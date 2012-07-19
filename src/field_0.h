@@ -3,14 +3,14 @@
 
 /*======================================================================*/
 /*                                                                      */
-/* field_0, 240x160@8,                                                  */
+/* field_0, 256x256@8,                                                  */
 /* Transparent palette entry: 0.                                        */
 /* + palette 256 entries, not compressed                                */
 /* + 8 tiles (t|f|p reduced) not compressed                             */
-/* + regular map (flat), not compressed, 30x20                          */
-/* Total size: 512 + 512 + 1200 = 2224                                  */
+/* + regular map (in SBBs), not compressed, 32x32                       */
+/* Total size: 512 + 512 + 2048 = 3072                                  */
 /*                                                                      */
-/* Time-stamp: 2012-07-18, 22:05:56                                     */
+/* Time-stamp: 2012-07-19, 02:14:22                                     */
 /* Exported by Cearn's GBA Image Transmogrifier                         */
 /* ( http://www.coranac.com/projects/#grit )                            */
 /*                                                                      */
@@ -22,8 +22,8 @@
 #define field_0TilesLen 512
 extern const unsigned short field_0Tiles[256];
 
-#define field_0MapLen 1200
-extern const unsigned short field_0Map[600];
+#define field_0MapLen 2048
+extern const unsigned short field_0Map[1024];
 
 #define field_0PalLen 512
 extern const unsigned short field_0Pal[256];

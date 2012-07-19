@@ -252,6 +252,26 @@ typedef struct
 #define REG_DISPSTAT		*(vu16*)(REG_BASE+0x0004)	//!< Display status
 #define REG_VCOUNT		*(vu16*)(REG_BASE+0x0006)	//!< Scanline count
 
+// Background control registers
+#define REG_BGCNT			((vu16*)(REG_BASE+0x0008))	//!< Bg control array
+
+#define REG_BG0CNT			*(vu16*)(REG_BASE+0x0008)	//!< Bg0 control
+#define REG_BG1CNT			*(vu16*)(REG_BASE+0x000A)	//!< Bg1 control
+#define REG_BG2CNT			*(vu16*)(REG_BASE+0x000C)	//!< Bg2 control
+#define REG_BG3CNT			*(vu16*)(REG_BASE+0x000E)	//!< Bg3 control
+
+// Regular background scroll registers. (write only!)
+#define REG_BG_OFS			((BG_POINT*)(REG_BASE+0x0010))	//!< Bg scroll array
+
+#define REG_BG0HOFS			*(vu16*)(REG_BASE+0x0010)		//!< Bg0 horizontal scroll
+#define REG_BG0VOFS			*(vu16*)(REG_BASE+0x0012)		//!< Bg0 vertical scroll
+#define REG_BG1HOFS			*(vu16*)(REG_BASE+0x0014)		//!< Bg1 horizontal scroll
+#define REG_BG1VOFS			*(vu16*)(REG_BASE+0x0016)		//!< Bg1 vertical scroll
+#define REG_BG2HOFS			*(vu16*)(REG_BASE+0x0018)		//!< Bg2 horizontal scroll
+#define REG_BG2VOFS			*(vu16*)(REG_BASE+0x001A)		//!< Bg2 vertical scroll
+#define REG_BG3HOFS			*(vu16*)(REG_BASE+0x001C)		//!< Bg3 horizontal scroll
+#define REG_BG3VOFS			*(vu16*)(REG_BASE+0x001E)		//!< Bg3 vertical scroll
+
 // DMA registers
 
 #define REG_DMA	      ((volatile DMA_REC*)(REG_BASE+0x00B0))	//!< DMA as DMA_REC array
@@ -301,6 +321,40 @@ typedef struct
 #define DCNT_BG2			   0x0400	//!< Enable bg 2
 #define DCNT_BG3			   0x0800	//!< Enable bg 3
 #define DCNT_OBJ			   0x1000	//!< Enable objects
+
+//== REG_BGxCNT
+#define BG_MOSAIC		0x0040	//!< Enable Mosaic
+#define BG_4BPP				 0	//!< 4bpp (16 color) bg (no effect on affine bg)
+#define BG_8BPP			0x0080	//!< 8bpp (256 color) bg (no effect on affine bg)
+#define BG_WRAP			0x2000	//!< Wrap around edges of affine bgs
+#define BG_SIZE0			 0
+#define BG_SIZE1		0x4000
+#define BG_SIZE2		0x8000
+#define BG_SIZE3		0xC000
+#define BG_REG_32x32		 0	//!< reg bg, 32x32 (256x256 px)
+#define BG_REG_64x32	0x4000	//!< reg bg, 64x32 (512x256 px)
+#define BG_REG_32x64	0x8000	//!< reg bg, 32x64 (256x512 px)
+#define BG_REG_64x64	0xC000	//!< reg bg, 64x64 (512x512 px)
+#define BG_AFF_16x16		 0	//!< affine bg, 16x16 (128x128 px)
+#define BG_AFF_32x32	0x4000	//!< affine bg, 32x32 (256x256 px)
+#define BG_AFF_64x64	0x8000	//!< affine bg, 64x64 (512x512 px)
+#define BG_AFF_128x128	0xC000	//!< affine bg, 128x128 (1024x1024 px)
+
+#define BG_PRIO_MASK	0x0003
+#define BG_PRIO_SHIFT		 0
+#define BG_PRIO(n)		((n)<<BG_PRIO_SHIFT)
+
+#define BG_CBB_MASK		0x000C
+#define BG_CBB_SHIFT		 2
+#define BG_CBB(n)		((n)<<BG_CBB_SHIFT)
+
+#define BG_SBB_MASK		0x1F00
+#define BG_SBB_SHIFT		 8
+#define BG_SBB(n)		((n)<<BG_SBB_SHIFT)
+
+#define BG_SIZE_MASK	0xC000
+#define BG_SIZE_SHIFT		14
+#define BG_SIZE(n)		((n)<<BG_SIZE_SHIFT)
 
 //== REG_KEYINPUT
 
