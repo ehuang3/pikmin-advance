@@ -3,6 +3,8 @@
 #ifndef MYLIB_H
 #define MYLIB_H
 
+#include "oamdef.h"
+
 //== Typedefs
 
 typedef unsigned char 	u8;
@@ -82,6 +84,22 @@ typedef struct
    volatile void *dst;
    volatile unsigned int cnt;
 } DMA_REC;
+
+typedef struct OBJ_ATTR
+{
+	u16 attr0;
+	u16 attr1;
+	u16 attr2;
+	s16 fill;
+} ALIGN4 OBJ_ATTR;
+
+typedef struct OBJ_AFFINE
+{
+	u16 fill0[3];	s16 pa;
+	u16 fill1[3];	s16 pb;
+	u16 fill2[3];	s16 pc;
+	u16 fill3[3];	s16 pd;
+} ALIGN4 OBJ_AFFINE;
 
 //==== Memory
 
@@ -308,19 +326,44 @@ typedef struct
 //==== Control flags
 
 //== REG_DISPCNT
-#define DCNT_MODE0			     0	//!< Mode 0; bg 0-4: reg
+#define DCNT_MODE0				 0	//!< Mode 0; bg 0-4: reg
 #define DCNT_MODE1			0x0001	//!< Mode 1; bg 0-1: reg; bg 2: affine
 #define DCNT_MODE2			0x0002	//!< Mode 2; bg 2-3: affine
 #define DCNT_MODE3			0x0003	//!< Mode 3; bg2: 240x160\@16 bitmap
 #define DCNT_MODE4			0x0004	//!< Mode 4; bg2: 240x160\@8 bitmap
 #define DCNT_MODE5			0x0005	//!< Mode 5; bg2: 160x128\@16 bitmap
+#define DCNT_GB				0x0008	//!< (R) GBC indicator
+#define DCNT_PAGE			0x0010	//!< Page indicator
+#define DCNT_OAM_HBL		0x0020	//!< Allow OAM updates in HBlank
+#define DCNT_OBJ_2D				 0	//!< OBJ-VRAM as matrix
+#define DCNT_OBJ_1D			0x0040	//!< OBJ-VRAM as array
+#define DCNT_BLANK			0x0080	//!< Force screen blank
+#define DCNT_BG0			0x0100	//!< Enable bg 0
+#define DCNT_BG1			0x0200	//!< Enable bg 1
+#define DCNT_BG2			0x0400	//!< Enable bg 2
+#define DCNT_BG3			0x0800	//!< Enable bg 3
+#define DCNT_OBJ			0x1000	//!< Enable objects
+#define DCNT_WIN0			0x2000	//!< Enable window 0
+#define DCNT_WIN1			0x4000	//!< Enable window 1
+#define DCNT_WINOBJ			0x8000	//!< Enable object window
 
-// layers
-#define DCNT_BG0			   0x0100	//!< Enable bg 0
-#define DCNT_BG1			   0x0200	//!< Enable bg 1
-#define DCNT_BG2			   0x0400	//!< Enable bg 2
-#define DCNT_BG3			   0x0800	//!< Enable bg 3
-#define DCNT_OBJ			   0x1000	//!< Enable objects
+#define DCNT_MODE_MASK		0x0007
+#define DCNT_MODE_SHIFT			 0
+#define DCNT_MODE(n)		((n)<<DCNT_MODE_SHIFT)
+
+#define DCNT_LAYER_MASK		0x1F00
+#define DCNT_LAYER_SHIFT		 8
+#define DCNT_LAYER(n)		((n)<<DCNT_LAYER_SHIFT)
+
+#define DCNT_WIN_MASK		0xE000
+#define DCNT_WIN_SHIFT			13
+#define DCNT_WIN(n)			((n)<<DCNT_WIN_SHIFT)
+
+#define DCNT_BUILD(mode, layer, win, obj1d, objhbl)				\
+(																\
+		(((win)&7)<<13) | (((layer)&31)<<8) | (((obj1d)&1)<<6)	\
+	| (((objhbl)&1)<<5) | ((mode)&7)							\
+)
 
 //== REG_BGxCNT
 #define BG_MOSAIC		0x0040	//!< Enable Mosaic
@@ -527,6 +570,62 @@ void setPixel(int,int,u16);
 void drawRect(int,int,int,int,u16);
 
 void drawHollowRect(int,int,int,int,u16);
+
+//== OAM functions
+
+void oam_init(OBJ_ATTR *obj, uint count);
+void oam_copy(OBJ_ATTR *dst, const OBJ_ATTR *src, uint count);
+
+INLINE OBJ_ATTR *obj_set_attr(OBJ_ATTR *obj, u16 a0, u16 a1, u16 a2);
+INLINE void obj_set_pos(OBJ_ATTR *obj, int x, int y);
+INLINE void obj_hide(OBJ_ATTR *oatr);
+INLINE void obj_unhide(OBJ_ATTR *obj, u16 mode);
+
+// === INLINES ========================================================
+
+//! Prepare a named bit-field for for insterion or combination.
+#define BFN_PREP(x, name)	( ((x)<<name##_SHIFT) & name##_MASK )
+
+//! Get the value of a named bitfield from \a y. Equivalent to (var=) y.name
+#define BFN_GET(y, name)	( ((y) & name##_MASK)>>name##_SHIFT )
+
+//! Set a named bitfield in \a y to \a x. Equivalent to y.name= x.
+#define BFN_SET(y, x, name)	(y = ((y)&~name##_MASK) | BFN_PREP(x,name) )
+
+//! Compare a named bitfield to named literal \a x.
+#define BFN_CMP(y, x, name)	( ((y)&name##_MASK) == (x) )
+
+
+//! Massage \a x for use in bitfield \a name with pre-shifted \a x
+#define BFN_PREP2(x, name)	( (x) & name##_MASK )
+
+//! Get the value of bitfield \a name from \a y, but don't down-shift
+#define BFN_GET2(y, name)	( (y) & name##_MASK )
+
+//! Set bitfield \a name from \a y to \a x with pre-shifted \a x
+#define BFN_SET2(y,x,name)	( y = ((y)&~name##_MASK) | BFN_PREP2(x,name) )
+
+//! Set the attributes of an object.
+INLINE OBJ_ATTR *obj_set_attr(OBJ_ATTR *obj, u16 a0, u16 a1, u16 a2)
+{
+    obj->attr0= a0; obj->attr1= a1; obj->attr2= a2;
+    return obj;
+}
+
+//! Set the position of \a obj
+INLINE void obj_set_pos(OBJ_ATTR *obj, int x, int y)
+{
+    BFN_SET(obj->attr0, y, ATTR0_Y);
+    BFN_SET(obj->attr1, x, ATTR1_X);
+}
+
+//! Hide an object.
+INLINE void obj_hide(OBJ_ATTR *obj)
+{   BFN_SET2(obj->attr0, ATTR0_HIDE, ATTR0_MODE);        }
+
+//! Unhide an object.
+INLINE void obj_unhide(OBJ_ATTR *obj, u16 mode)
+{   BFN_SET2(obj->attr0, mode, ATTR0_MODE);          }
 
 
 

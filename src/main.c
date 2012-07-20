@@ -3,7 +3,9 @@
 #include "mylib.h"
 #include <debugging.h>
 #include "field_0.h"
+#include "pikmin_sheet.h"
 
+OBJ_ATTR obj_buffer[128];
 
 int main(void)
 {
@@ -11,9 +13,28 @@ int main(void)
    memcpy(pal_bg_mem, field_0Pal, field_0PalLen);
    memcpy(&tile8_mem[0][0], field_0Tiles, field_0TilesLen);
    memcpy(&se_mem[30][0], field_0Map, field_0MapLen);
+   
+   memcpy(&tile8_mem[4][0], pikmin_sheetTiles, pikmin_sheetTilesLen);
+   memcpy(pal_obj_mem, pikmin_sheetPal, pikmin_sheetPalLen);
 	
 	REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_8BPP | BG_REG_32x32;
-	REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+	REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ| DCNT_OBJ_1D;
+	
+	oam_init(obj_buffer, 128);
+	
+	u32 tid=0, pb=0;
+	
+	OBJ_ATTR *pkm = &obj_buffer[0];
+	
+	obj_set_attr(pkm, 
+	             ATTR0_TALL, 
+	             ATTR1_SIZE_16x32, 
+	             ATTR2_PALBANK(pb) | tid);
+	             
+	pkm->attr0 |= ATTR0_8BPP;
+	
+	oam_copy(oam_mem, obj_buffer, 1);
+	
 	
 	int x=0, y=0;
 	while(1)

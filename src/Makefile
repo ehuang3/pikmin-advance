@@ -11,12 +11,12 @@ PROGNAME = Pikmin
 
 # The object files you want to compile into your program
 # This should be a space (SPACE!) separated list of .o files
-OFILES = mylib.o main.o field_0.o
+OFILES = mylib.o main.o field_0.o pikmin_sheet.o
 
 # The header files you have created.
 # This is necessary to determine when to recompile for files.
 # This should be a space (SPACE!) separated list of .h files
-HFILES = mylib.h field_0.h
+HFILES = mylib.h field_0.h pikmin_sheet.h
 
 ################################################################################
 # These are various settings used to make the GBA toolchain work

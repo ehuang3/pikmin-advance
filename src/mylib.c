@@ -136,3 +136,38 @@ void drawHollowRect(int x, int y, int width, int height, u16 color)
 	drawRect(x+width-1,y,1,height,color);
 	drawRect(x,y+height-1,width,1,color);
 }
+
+void oam_init(OBJ_ATTR *obj, uint count)
+{
+    u32 nn= count;
+    u32 *dst= (u32*)obj;
+
+    // Hide each object
+    while(nn--)
+    {
+        *dst++= ATTR0_HIDE;
+        *dst++= 0;
+    }
+    // init oam
+    oam_copy(oam_mem, obj, count);
+}
+
+void oam_copy(OBJ_ATTR *dst, const OBJ_ATTR *src, uint count)
+{
+
+// NOTE: while struct-copying is the Right Thing to do here, 
+//   there's a strange bug in DKP that sometimes makes it not work
+//   If you see problems, just use the word-copy version.
+#if 1
+    while(count--)
+        *dst++ = *src++;
+#else
+    u32 *dstw= (u32*)dst, *srcw= (u32*)src;
+    while(count--)
+    {
+        *dstw++ = *srcw++;
+        *dstw++ = *srcw++;
+    }
+#endif
+
+}
