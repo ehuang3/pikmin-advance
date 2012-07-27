@@ -1,7 +1,7 @@
 ################################################################################
 # These are variables for the GBA toolchain build
 # You can add others if you wish to
-# NOTICE:  Eric Huang
+# Name:  Eric Huang
 ################################################################################
 
 # The name of your desired GBA game
@@ -11,12 +11,12 @@ PROGNAME = Pikmin
 
 # The object files you want to compile into your program
 # This should be a space (SPACE!) separated list of .o files
-OFILES = mylib.o main.o field_0.o pikmin_sheet.o
+OFILES = mylib.o main.o bd_forest.o bg_forest.o pikmin_sheet.o menu.o title.o text.o
 
 # The header files you have created.
 # This is necessary to determine when to recompile for files.
 # This should be a space (SPACE!) separated list of .h files
-HFILES = mylib.h field_0.h pikmin_sheet.h
+HFILES = mylib.h pikmin_sheet.h geometry.h character.h linkedlist.h olimar.h pikmin.h
 
 ################################################################################
 # These are various settings used to make the GBA toolchain work

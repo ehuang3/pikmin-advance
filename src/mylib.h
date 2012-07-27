@@ -19,6 +19,8 @@ typedef volatile unsigned char   vu8;
 typedef volatile unsigned short  vu16;
 typedef volatile unsigned int    vu32;
 
+typedef unsigned char   bool;
+
 // Secondary typedefs
 
 typedef s32 FIXED;					//!< Fixed point type
@@ -194,6 +196,9 @@ typedef struct OBJ_AFFINE
 *	se_mem[y][x]	= screenblock y, entry x	( SCR_ENTRY )
 */
 #define se_mem			((SCREENBLOCK*)MEM_VRAM)
+
+// Screen-entries
+#define map_mem      ((SCR_ENTRY*)MEM_VRAM)
 
 
 //! Screenblock as matrices
@@ -513,7 +518,7 @@ INLINE u32 key_is_up(u32 key)		{	return ~__key_curr & key;	}
 //! Gives the keys of \a key that were previously down
 INLINE u32 key_was_down(u32 key)	{	return  __key_prev & key;	}
 
-//! Gives the keys of \a key that were previously down
+//! Gives the keys of ~\a key that were previously down
 INLINE u32 key_was_up(u32 key)		{	return ~__key_prev & key;	}
 
 
@@ -627,7 +632,8 @@ INLINE void obj_hide(OBJ_ATTR *obj)
 INLINE void obj_unhide(OBJ_ATTR *obj, u16 mode)
 {   BFN_SET2(obj->attr0, mode, ATTR0_MODE);          }
 
-
+#define CLAMP(a,max) ( SIGN(a)*(a) > max ? SIGN(a)*max : a)
+#define SIGN(a) ( (a)>0 ? 1 : -1)
 
 #endif // MYLIB_H
 
