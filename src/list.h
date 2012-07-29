@@ -1,3 +1,10 @@
+/**
+ * CS 2110 - Spring 2012 - Homework #11
+ * Edited by: Brandon Whitehead
+ *
+ * list.h
+ */
+
 #ifndef LIST_H
 #define LIST_H
 
@@ -6,8 +13,13 @@
  ** Datatype definitions DO NOT TOUCH **
  ***************************************/
 
+/* Forward declaration 
+Don't know what a forward declaration is? 
+Consult the fountain of knowledge: http://en.wikipedia.org/wiki/Forward_declaration */
 struct lnode;
 
+/* Given to you for free, However you better know how to do this come time for the final exam */
+/* The linked list struct.  Has a head & tail pointer. */
 typedef struct llist
 {
   struct lnode* head; /* Head pointer either points to a node with data or NULL */
@@ -15,6 +27,7 @@ typedef struct llist
   unsigned int size; /* Size of the linked list */
 } list;
 
+/* Given to you for free, However you better know how to do this come time for the final exam */
 /* A function pointer type that points to a function that takes in a void* and returns nothing call it list_op */
 typedef void (*list_op)(void*);
 /* A function pointer type that points to a function that takes in a const void* and returns an int call it list_pred */
@@ -51,4 +64,32 @@ void empty_list(list* llist, list_op free_func);
 
 /* Traversal */
 void traverse(list* llist, list_op do_func);
+
+/* Debugging Support */
+#ifdef LLDEBUG
+    /*
+       Does the following if compiled in debug mode
+       When compiled in release mode does absolutely nothing.
+    */
+    #define IF_DEBUG(call) (call)
+    /* Prints text (in red) if in debug mode */
+    #define DEBUG_PRINT(string) fprintf(stderr, "\033[31m%s:%d %s\n\033[0m", __FILE__, __LINE__, (string))
+    /* Asserts if the expression given is true (!0) */
+    /* If this fails it prints a message and terminates */
+    #define DEBUG_ASSERT(expr)   \
+    do                           \
+    {                            \
+        if (!(expr))             \
+        {                        \
+            fprintf(stderr, "ASSERTION FAILED %s != TRUE (%d) IN %s ON line %d\n", #expr, (expr), __FILE__, __LINE__); \
+            exit(0);             \
+        }                        \
+    } while(0)
+#else
+    #define IF_DEBUG(call)
+    #define DEBUG_PRINT(string)
+    #define DEBUG_ASSERT(expr)
+#endif
+
+#endif
 

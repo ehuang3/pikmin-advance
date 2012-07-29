@@ -4,6 +4,8 @@
 #include "mylib.h"
 #include "linkedlist.h"
 
+
+
 typedef struct { u32 id;                  //Character data
                  POINT pos;
                  POINT vel;

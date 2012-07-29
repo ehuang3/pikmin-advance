@@ -10,8 +10,8 @@
 # INCLUDES is a list of directories containing header files
 BUILD    := build
 SOURCES  := src
-DATA     := 
-INCLUDES := 
+DATA     := data
+INCLUDES := include
 
 # The name of your desired GBA game
 # No SPACES AFTER THE NAME.
@@ -39,6 +39,7 @@ TOOLDIR  = /usr/local/cs2110-tools
 ARMLIB   = $(TOOLDIR)/arm-thumb-eabi/lib
 CFLAGS   = -Wall -Werror -std=c99 -pedantic 
 CFLAGS   += -mthumb-interwork -mlong-calls -nostartfiles -MMD -MP -I $(TOOLDIR)/include
+CFLAGS   += -I $(addprefix $(CURDIR)/,$(INCLUDES))
 LDFLAGS = -L $(TOOLDIR)/lib \
 		  -L $(TOOLDIR)/lib/gcc/arm-thumb-eabi/4.4.1/thumb \
 		  -L $(ARMLIB) \

@@ -35,7 +35,7 @@ static node* create_node(void* data);
   */
 list* create_list(void)
 {
-    list* l = malloc(list);
+    list* l = malloc(sizeof(list));
     l->head = 0;
     l->tail = 0;
     l->size = 0;
@@ -52,7 +52,7 @@ list* create_list(void)
   */
 static node* create_node(void* data)
 {
-    node* nd = malloc(sizeof node);
+    node* nd = malloc(sizeof(node));
     nd->data = data;
     nd->prev = 0;
     nd->next = 0;
@@ -70,8 +70,11 @@ void push_front(list* llist, void* data)
 {
    node* nd = create_node(data);
 
-   nd->next = llist->head;
-   llist->head->prev = nd;
+   if(llist->head)
+   {
+      nd->next = llist->head;
+      llist->head->prev = nd;
+   }
    llist->head = nd;
 
    if(!llist->tail)
@@ -90,9 +93,12 @@ void push_front(list* llist, void* data)
 void push_back(list* llist, void* data)
 {
    node* nd = create_node(data);
-
-   nd->prev = llist->tail;
-   llist->tail->next = nd;
+   
+   if(llist->tail)
+   {
+      nd->prev = llist->tail;
+      llist->tail->next = nd;
+   }
    llist->tail = nd;
 
    if(!llist->head)
@@ -113,19 +119,29 @@ void push_back(list* llist, void* data)
   */
 int remove_front(list* llist, list_op free_func)
 {
-   if(!llist->size)
+   if(is_empty(llist))
       return -1;
-
-   free_func(llist->head->data);
-
-   node* nd = llist->head;
-   llist->head = nd->next;
    
-   llist->head->prev = 0;
+   node* head = llist->head;
+   if(head->next)
+   {
+      //Move head to next node
+      llist->head = head->next;
+      llist->head->prev = 0;
+   }
+   else
+   {
+      //llist has only one node
+      llist->head = 0;
+      llist->tail = 0;
+   }
    
    llist->size--;
-
-   free(nd);
+   
+   free_func(head->data);
+   free(head);
+   
+   return 0;
 }
 
 /** remove_back
@@ -140,19 +156,29 @@ int remove_front(list* llist, list_op free_func)
   */
 int remove_back(list* llist, list_op free_func)
 {
-    if(llist->size == 0)
+   if(is_empty(llist))
       return -1;
-      
-    free_func(llist->tail->data);
-    
-    node* nd = llist->tail;
-    llist->tail = nd->prev;
-    
-    llist->tail->next = 0;
-    
-    llist->size--;
-    
-    free(nd);
+   
+   node* tail = llist->tail;
+   if(tail->prev)
+   {
+      //Move tail to prev node
+      llist->tail = tail->prev;
+      llist->tail->next = 0;
+   }
+   else
+   {
+      //llist has only one node
+      llist->head = 0;
+      llist->tail = 0;
+   }
+   
+   llist->size--;
+   
+   free_func(tail->data);
+   free(tail);
+   
+   return 0;
 }
 
 /** remove_if
@@ -175,24 +201,38 @@ int remove_if(list* llist, list_pred pred_func, list_op free_func)
    {
       if(pred_func(nd->data))
       {
-         free_func(nd->data);
+         //Store next node
+         node* temp = nd->next;
          
+         //Remove node from list
          if(nd == llist->head)
-            llist->head = nd->next;
-         if(nd == llist->tail)
-            llist->tail = nd->prev;
-         
-         if(nd->prev)
+         {
+            remove_front(llist, free_func);
+         }
+         else if(nd == llist->tail)
+         {
+            remove_back(llist, free_func);
+         }
+         else
+         {
+            //Node is neither front nor back
             nd->prev->next = nd->next;
-         if(nd->next)
             nd->next->prev = nd->prev;
             
-         free(nd);
-         
+            free_func(nd->data);
+            free(nd);
+            
+            llist->size--;
+         }
+
          count++;
-         llist->size--;
+         
+         nd = temp;
       }
-      n = n->next;
+      else
+      {
+         nd = nd->next;
+      }
    }
 
    return count;
@@ -237,7 +277,7 @@ void* back(list* llist)
   */
 int is_empty(list* llist)
 {
-    return llist->size > 0;
+    return llist->size == 0;
 }
 
 /** size
@@ -249,7 +289,7 @@ int is_empty(list* llist)
   */
 int size(list* llist)
 {
-    return llist->size;
+   return llist->size;
 }
 
 /** empty_list
@@ -265,12 +305,16 @@ void empty_list(list* llist, list_op free_func)
    node* nd = llist->head;
    while(llist->size--)
    {
+      node* next = nd->next;
+      
       free_func(nd->data);
       free(nd);
-      nd = nd->next;
+      
+      nd = next;
    }
    llist->head = 0;
    llist->tail = 0;
+   llist->size = 0;
 }
 
 /** traverse
