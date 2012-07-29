@@ -3,5 +3,8 @@
 *.elf
 *.gba
 
+# folders
+build/
+
 # temps
 *~
